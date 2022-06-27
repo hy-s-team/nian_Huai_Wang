@@ -2,6 +2,7 @@ import * as THREE from "three";
 import { Utils } from "run-scene-v2";
 const { getRes, getMacro } = Utils;
 import { MTNhw } from "./MTNhw";
+import { FresnelShader } from "./../materials/FresnelShader";
 // 声明变量
 let camera, scene, controls, renderer2, renderer, dom, t, p, runScene;
 
@@ -91,6 +92,8 @@ function Change(runScene) {
     this.mtnhw.lightBallMesh.material.opacity = 0;
     this.mtnhw.treeMaterial.uniforms.progress.value = 1;
 
+    this.clock = new THREE.Clock();
+
     setTimeout(() => {
       // runScene.bloom.glow.bloomParams.isBloom = false;
     }, 1000);
@@ -98,6 +101,11 @@ function Change(runScene) {
     t.runScene.cb.render.add("flowerRotate", () => {
       t.flower.flower && (t.flower.flower.rotation.y += 0.01);
       // this.mtnhw && this.mtnhw.update();
+    });
+
+    t.runScene.cb.render.add("bubble", () => {
+      t.bubble.fresnelUniforms &&
+        (t.bubble.fresnelUniforms.time.value += 6 * this.clock.getDelta());
     });
   });
 
@@ -638,7 +646,6 @@ class KongMingLight {
         this.Kong_Ming_Deng[`kmd${num}`].instanceMatrix.needsUpdate = true;
 
         this.Kong_Ming_Deng[`kmd${num}`].visible = false;
-
       }
       this.Kong_Ming_Deng[`kmd${num}`].name = `孔明灯组${num + 1}`;
       t.runScene.modelEx.add(this.Kong_Ming_Deng[`kmd${num}`]);
@@ -647,7 +654,8 @@ class KongMingLight {
 
   async anima() {
     Object.values(this.Kong_Ming_Deng).map((light) => {
-      if (this.lightAnimaEvents[light.name]) this.lightAnimaEvents ? this.lightAnimaEvents[light.name].kill() : null;
+      if (this.lightAnimaEvents[light.name])
+        this.lightAnimaEvents ? this.lightAnimaEvents[light.name].kill() : null;
       this._gsap(light, light.name);
     });
   }
@@ -658,15 +666,15 @@ class KongMingLight {
     light.position.y = 0;
     const addY = Math.random() * 500;
     const time = (Math.random() + 0.6) * 25;
-    console.log(light.name, 'light');
+    console.log(light.name, "light");
     this.lightAnimaEvents[name] = Utils.anima(
       {
         lightY: light.position.y,
-        opc: 1
+        opc: 1,
       },
       {
         lightY: addY,
-        opc: 0
+        opc: 0,
       },
       time,
       (data) => {
@@ -740,12 +748,56 @@ class Tree {
 // 气泡
 class Bubble {
   bubble = null;
+  fresnelUniforms = undefined;
   init() {
     this.bubble = t.methods.getModel("水泡");
     this.bubble.visible = true;
+    this.bubble.scale.set(0, 0, 0);
+    this.fresnelUniforms = FresnelShader.uniforms;
+    this.bubble.material.onBeforeCompile = (shader) => {
+      if (!shader.uniforms.time)
+        shader.uniforms.time = this.fresnelUniforms.time;
+      if (!shader.uniforms.fresnelBias)
+        shader.uniforms.fresnelBias = this.fresnelUniforms.bias;
+      if (!shader.uniforms.fresnelScale)
+        shader.uniforms.fresnelScale = this.fresnelUniforms.scale;
+      if (!shader.uniforms.fresnelPower)
+        shader.uniforms.fresnelPower = this.fresnelUniforms.power;
+      shader.vertexShader = shader.vertexShader.replace(
+        /varying vec3 vWorldPosition;/g,
+        FresnelShader.vertexParas
+      );
+      shader.vertexShader = shader.vertexShader.replace(
+        /#include <begin_vertex>/g,
+        FresnelShader.vertexShader1
+      );
+      shader.vertexShader = shader.vertexShader.replace(
+        /vWorldPosition = worldPosition.xyz;/g,
+        FresnelShader.vertexShader2
+      );
+      shader.fragmentShader = shader.fragmentShader.replace(
+        /#include <transmission_pars_fragment>/g,
+        FresnelShader.fragmentParas
+      );
+      shader.fragmentShader = shader.fragmentShader.replace(
+        /vec3 totalEmissiveRadiance = emissive;/g,
+        FresnelShader.fragmentShaderEmissive
+      );
+    };
   }
   events() {
-    console.log(123, '123');
+    Utils.anima(
+      {
+        scale: 0,
+      },
+      {
+        scale: 1,
+      },
+      4,
+      (data) => {
+        this.bubble.scale.set(data.scale, data.scale, data.scale);
+      },
+    );
   }
 }
 
