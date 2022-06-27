@@ -48,6 +48,8 @@ function Change(runScene) {
 
   this.tree = new Tree();
 
+  this.bubble = new Bubble();
+
   // 基本的场景配置
   controls.maxPolarAngle = Math.PI / 2 - 0.2;
 
@@ -73,6 +75,8 @@ function Change(runScene) {
     this.kongMingLight.init();
 
     this.lotusBgc.init();
+
+    this.bubble.init();
 
     const tree = t.runScene.modelEx.getModel("group38_shugan1");
 
@@ -508,7 +512,7 @@ class Radial {
           y: -2.8734593602424665,
           z: 166.82574475465094,
         },
-        time: 500,
+        time: 1000,
       },
       Shedeng1_0: {
         model: t.methods.getModel("Shedeng1_0"),
@@ -517,7 +521,7 @@ class Radial {
           y: 17.73703333007011,
           z: -109.30617576220645,
         },
-        time: 500,
+        time: 1000,
       },
       Shedeng1_1: {
         model: t.methods.getModel("Shedeng1_1"),
@@ -526,7 +530,7 @@ class Radial {
           y: -2.8734593602424665,
           z: 150.82574475465094,
         },
-        time: 500,
+        time: 1000,
       },
       Shedeng1_2: {
         model: t.methods.getModel("Shedeng1_2"),
@@ -535,25 +539,25 @@ class Radial {
           y: -2.8734593602424665,
           z: 126.82574475465094,
         },
-        time: 500,
+        time: 1000,
       },
       Shedeng1_3: {
         model: t.methods.getModel("Shedeng1_3"),
         rotation: {
-          x: -101.5705041271409,
-          y: 60,
-          z: -1.2,
+          x: -1.7718410164401246,
+          y: 1.287409187499856,
+          z: -2.02599349243394,
         },
-        time: 200,
+        time: 20,
       },
       Shedeng1_4: {
         model: t.methods.getModel("Shedeng1_4"),
         rotation: {
-          x: -30,
-          y: -14.8734593602424665,
-          z: -6.2574475465094,
+          x: -1.7701299049516555,
+          y: -0.8572125165982781,
+          z: -0.10905107736147579,
         },
-        time: 500,
+        time: 20,
       },
     };
     this.radialMove();
@@ -572,6 +576,7 @@ class Radial {
         {
           repeat: -1,
           yoyo: true,
+          // yoyoEase: true,
           x: rotation.x,
           y: rotation.y,
           z: rotation.z,
@@ -594,12 +599,13 @@ class KongMingLight {
   // 孔明灯表
   kongMingDengMap = {};
   isOnce = true;
-  lightAnimaEvents = null;
+  // 灯笼上升动画
+  lightAnimaEvents = {};
   // 新孔明灯表
   Kong_Ming_Deng = {};
 
   async init() {
-    this.kongMingDeng = t.methods.getModel("孔明灯_0");
+    this.kongMingDeng = t.methods.getModel("孔明灯");
     const count = 25;
     new Array(5).fill("").map((_, num) => {
       const { geometry, material } = this.kongMingDeng;
@@ -621,6 +627,7 @@ class KongMingLight {
         dummy.position.set(x, y, z);
         dummy.rotation.set(-Math.PI / 2, 0, 0);
         // dummy.scale.set(30, 30, 30);
+        dummy.scale.set(2, 2, 2);
         this.Kong_Ming_Deng[`kmd${num}`].setMatrixAt(i, dummy.matrix);
         this.kongMingDengMap[`孔明灯克隆_${num}${i}`] = {
           id: i,
@@ -629,36 +636,47 @@ class KongMingLight {
         };
         dummy.updateMatrix();
         this.Kong_Ming_Deng[`kmd${num}`].instanceMatrix.needsUpdate = true;
+
+        this.Kong_Ming_Deng[`kmd${num}`].visible = false;
+
       }
+      this.Kong_Ming_Deng[`kmd${num}`].name = `孔明灯组${num + 1}`;
       t.runScene.modelEx.add(this.Kong_Ming_Deng[`kmd${num}`]);
     });
   }
 
   async anima() {
     Object.values(this.Kong_Ming_Deng).map((light) => {
-      light.visible = true;
-      light.position.y = 0;
-      const addY = Math.random() * 400;
-      const time = (Math.random() + 0.6) * 25;
-      this.lightAnimaEvents = Utils.anima(
-        {
-          lightY: light.position.y,
-          opc: 1
-        },
-        {
-          lightY: addY,
-          opc: 0
-        },
-        time,
-        (data) => {
-          light.position.y = data.lightY;
-          light.material.opacity = data.opc;
-        },
-        () => {
-          light.visible = false;
-        }
-      );
+      if (this.lightAnimaEvents[light.name]) this.lightAnimaEvents ? this.lightAnimaEvents[light.name].kill() : null;
+      this._gsap(light, light.name);
     });
+  }
+
+  _gsap(light, name) {
+    light.layers.enable(1);
+    light.visible = true;
+    light.position.y = 0;
+    const addY = Math.random() * 500;
+    const time = (Math.random() + 0.6) * 25;
+    console.log(light.name, 'light');
+    this.lightAnimaEvents[name] = Utils.anima(
+      {
+        lightY: light.position.y,
+        opc: 1
+      },
+      {
+        lightY: addY,
+        opc: 0
+      },
+      time,
+      (data) => {
+        light.position.y = data.lightY;
+        // light.material.opacity = data.opc;
+      },
+      () => {
+        light.visible = false;
+      }
+    );
   }
 }
 
@@ -679,6 +697,7 @@ class LotusBgc {
   }
 }
 
+// 生长树
 class Tree {
   once = true;
   anima() {
@@ -715,6 +734,18 @@ class Tree {
         t.mtnhw.treeMaterial.uniforms.progress.value = 1;
       }
     );
+  }
+}
+
+// 气泡
+class Bubble {
+  bubble = null;
+  init() {
+    this.bubble = t.methods.getModel("水泡");
+    this.bubble.visible = true;
+  }
+  events() {
+    console.log(123, '123');
   }
 }
 

@@ -40,6 +40,8 @@
         <button @click="lotusBgc">荷花背景</button>
 
         <button @click="showTree">树</button>
+
+        <button @click="bubbleEvents">水泡</button>
       </div>
       <div
         class="goldBorder"
@@ -143,9 +145,11 @@ export default {
         this.stats.update();
       });
     },
+    bubbleEvents() {
+      this.change.bubble.events();
+    },
     showTree() {
-      this.change.tree.anima(this.isShowTree);
-      this.isShowTree = !this.isShowTree;
+      this.change.tree.anima();
     },
     lotusBgc() {
       const cb = () => {
