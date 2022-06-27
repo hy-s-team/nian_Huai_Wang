@@ -1,7 +1,4 @@
-const glsl = require('glslify');
-
-export const LokiMatShader = {
-    vertexShader: glsl`
+const glsl=require("glslify"),LokiMatShader={vertexShader:glsl`
         uniform mat4 modelMatrix;
         uniform mat4 modelViewMatrix;
         uniform mat4 projectionMatrix;
@@ -28,9 +25,7 @@ export const LokiMatShader = {
         
             gl_Position = projectionMatrix * worldPos;
         }
-    `,
-
-    fragmentShader: glsl`
+    `,fragmentShader:glsl`
         precision highp float;
         #define OCTAVES 10
         #define PI 3.14159265359
@@ -130,5 +125,4 @@ export const LokiMatShader = {
         
             gl_FragColor = finalColor;
         }
-    `,
-};
+    `};export{LokiMatShader};

@@ -3,6 +3,7 @@ import { Utils } from "run-scene-v2";
 const { getRes, getMacro } = Utils;
 import { MTNhw } from "./MTNhw";
 import { FresnelShader } from "./../materials/FresnelShader";
+import VConsole from "vconsole";
 // 声明变量
 let camera, scene, controls, renderer2, renderer, dom, t, p, runScene;
 
@@ -29,6 +30,8 @@ function Change(runScene) {
   // 挂载runScene
   t.runScene = runScene;
 
+  this.vConsole = new VConsole();
+
   this.events = new Events();
 
   this.methods = new Methods();
@@ -41,7 +44,7 @@ function Change(runScene) {
 
   this.flower = new Flower();
 
-  // this.radial = new Radial();
+  this.radial = new Radial();
 
   this.kongMingLight = new KongMingLight();
 
@@ -51,6 +54,8 @@ function Change(runScene) {
 
   this.bubble = new Bubble();
 
+  this.squareLight = new SquareLight();
+
   // 基本的场景配置
   controls.maxPolarAngle = Math.PI / 2 - 0.2;
 
@@ -58,8 +63,6 @@ function Change(runScene) {
 
   // 加载结束
   runScene.on("lazyLoadedTexture", () => {
-    // 初始化解析数据添加模型
-    // this.resolveJson.init();
   });
 
   runScene.on("complete", async () => {
@@ -71,13 +74,15 @@ function Change(runScene) {
 
     this.shopEvent.createGoldBorder();
 
-    // this.radial.init();
+    this.radial.init();
 
     this.kongMingLight.init();
 
     this.lotusBgc.init();
 
     this.bubble.init();
+
+    this.squareLight.init();
 
     const tree = t.runScene.modelEx.getModel("group38_shugan1");
 
@@ -95,7 +100,7 @@ function Change(runScene) {
     this.clock = new THREE.Clock();
 
     setTimeout(() => {
-      // runScene.bloom.glow.bloomParams.isBloom = false;
+      runScene.bloom.glow.bloomParams.isBloom = false;
     }, 1000);
 
     t.runScene.cb.render.add("flowerRotate", () => {
@@ -302,7 +307,8 @@ class ShopEvent {
       // console.log(this.shopMap[i].borderPosition);
       let dom = document.querySelector(`.${i}金币`);
       Utils.getMacro(() => {
-        dom.classList.add("show");
+        // dom.classList.add("show");
+        dom.classList.add("none");
       }, 500);
       let sprite = Utils.domTo3DSprite(dom);
       sprite.position.y += 100;
@@ -666,7 +672,6 @@ class KongMingLight {
     light.position.y = 0;
     const addY = Math.random() * 500;
     const time = (Math.random() + 0.6) * 25;
-    console.log(light.name, "light");
     this.lightAnimaEvents[name] = Utils.anima(
       {
         lightY: light.position.y,
@@ -708,8 +713,10 @@ class LotusBgc {
 // 生长树
 class Tree {
   once = true;
+  treeAnima = {};
   anima() {
-    Utils.anima(
+    this.reset();
+    this.treeAnima[`one`] = Utils.anima(
       {
         pg: 1,
       },
@@ -722,7 +729,9 @@ class Tree {
         if (data.pg <= 0.5 && this.once) {
           this.once = false;
           if (this.once) return;
-          Utils.anima(
+          this.treeAnima[`two`] && this.treeAnima[`two`].kill();
+          t.mtnhw.lightBallMesh.material.opacity = 0;
+          t.tree.treeAnima[`two`] = Utils.anima(
             {
               opc: 0,
             },
@@ -742,6 +751,14 @@ class Tree {
         t.mtnhw.treeMaterial.uniforms.progress.value = 1;
       }
     );
+  }
+
+  reset() {
+    this.once = true;
+    t.mtnhw.treeMaterial.uniforms.progress.value = 1;
+    t.mtnhw.lightBallMesh.material.opacity = 0;
+    this.treeAnima[`two`] && this.treeAnima[`two`].kill();
+    this.treeAnima[`one`] && this.treeAnima[`one`].kill();
   }
 }
 
@@ -793,12 +810,54 @@ class Bubble {
       {
         scale: 1,
       },
-      4,
+      3,
       (data) => {
         this.bubble.scale.set(data.scale, data.scale, data.scale);
       },
+      () => {
+        let timer = setTimeout(() => {
+          this.bubble.scale.set(0, 0, 0);
+          clearTimeout(timer);
+        }, 3000);
+      }
     );
   }
+}
+
+// 广场亮灯
+class SquareLight {
+  nianHuangTang = null;
+  guangCangDeng = null;
+  init() {
+    this.nianHuaiTang = t.runScene.modelEx.getModel('拈花堂亮灯group');
+    this.guangCangDeng = t.runScene.modelEx.getModel('广场亮灯group');
+    this.shangPuDeng = t.runScene.modelEx.getModel('商铺亮灯group');
+  }
+
+  niangHuaiTangEvents(isShow) {
+    this.nianHuaiTang.visible = isShow;
+  }
+
+  guangCangDengEvents(isShow) {
+    this.guangCangDeng.children.map((mode) => {
+      if (mode.name === 'Shedeng2') {
+        mode.visible = isShow
+      } else {
+        isShow ? mode.layers.enable(1) : mode.layers.set(0);
+      }
+    })
+  }
+
+  shangPuDengEvents(isShow) {
+    this.shangPuDeng.traverse((mode) => {
+      mode.layers && (mode.layers.mask = isShow ? 3 : 1)
+      if (mode.layers) {
+        isShow ? mode.layers.enable(1) : mode.layers.set(0);
+      }
+    })
+  }
+
+
 }
 
 // 基本事件

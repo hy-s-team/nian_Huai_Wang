@@ -33,6 +33,20 @@
           {{ item }}关灯
         </button>
 
+        <button
+          @click="
+            () => {
+              goldCoin(1, true);
+            }
+          "
+        >
+          金币1
+        </button>
+
+        <button @click="niangHuaiTang">拈花堂</button>
+        <button @click="guangCangDeng">广场亮灯</button>
+        <button @click="shangPuDeng">商铺亮灯</button>
+
         <button @click="flowerAnima">莲花动画</button>
 
         <button @click="kongMingAnima">孔明灯动画</button>
@@ -70,6 +84,9 @@ export default {
       isShowLotusBgc: true,
       kongMingLight: true,
       isShowTree: true,
+      niangHuaiTangEvents: true,
+      guangCangDengEvents: true,
+      shangPuDengEvents: true,
     };
   },
   mounted() {
@@ -77,7 +94,6 @@ export default {
     this.loadScene();
     // 打印点击的模型接口
     // bus.$on("logClickModel", this.logClickModel);
-
     // this.proxyMsg();
   },
   methods: {
@@ -87,7 +103,7 @@ export default {
         path: "./assets/scene.glb",
         rootDom: this.$refs["three-scene"],
         options: {
-          render2: true,
+          // render2: true,
           render3: true,
           texture: {
             // load: false,
@@ -131,6 +147,14 @@ export default {
         },
       }).on("complete", () => {
         this.onDone();
+        this.runScene.assetsEx.scene.children.map((i) => {
+          i.castShadow = false;
+          // if (i.isLight) this.runScene.modelEx.remove(i);
+        });
+        // this.runScene.assetsEx.scene.traverse((i) => {
+        //   i.matrixAutoUpdate = false;
+        //   // i.matrixWorldNeedsUpdate = false;
+        // });
       });
       this.change = new Change(this.runScene);
       console.log(this.runScene, "this.runScene");
@@ -144,6 +168,18 @@ export default {
       this.runScene.cb.render.add("stats", () => {
         this.stats.update();
       });
+    },
+    niangHuaiTang() {
+      this.change.squareLight.niangHuaiTangEvents(this.niangHuaiTangEvents);
+      this.niangHuaiTangEvents = !this.niangHuaiTangEvents;
+    },
+    guangCangDeng() {
+      this.change.squareLight.guangCangDengEvents(this.guangCangDengEvents);
+      this.guangCangDengEvents = !this.guangCangDengEvents;
+    },
+    shangPuDeng() {
+      this.change.squareLight.shangPuDengEvents(this.shangPuDengEvents);
+      this.shangPuDengEvents = !this.shangPuDengEvents;
     },
     bubbleEvents() {
       this.change.bubble.events();
@@ -193,6 +229,12 @@ export default {
     lightClose(floor) {
       this.change.towerEvent.lightControl(floor, false);
     },
+    // 金币显示隐藏
+    goldCoin(shopId, isShow) {
+      let dom = document.querySelector(`.商铺${shopId}金币`);
+      dom.classList[isShow ? `remove` : `add`]("none");
+      dom.classList[isShow ? `add` : `remove`]("show");
+    },
   },
 };
 </script>
@@ -201,7 +243,6 @@ export default {
 .three-scene {
   width: 100vw;
   height: 100vh;
-
   // > button {
   //   position: absolute;
   //   z-index: 2;
@@ -217,11 +258,15 @@ export default {
     height: 50px;
     background-color: red;
     opacity: 0;
-    background: url("../../../public/assets/Glod.gif") repeat;
+    background: url("../../../public/assets/Glod.png") repeat;
     background-size: 100% 100%;
   }
   .show {
     opacity: 1 !important;
+  }
+
+  .none {
+    opacity: 0 !important;
   }
 }
 </style>

@@ -1,7 +1,4 @@
-const glsl = require('glslify');
-
-export const ParticleMatShader = {
-    vertexShader: glsl`
+const glsl=require("glslify"),ParticleMatShader={vertexShader:glsl`
         #define OCTAVES 10
         #define PI 3.14159265359
         #define S smoothstep
@@ -90,9 +87,7 @@ export const ParticleMatShader = {
             gl_Position = projectionMatrix * modelViewMatrix * vec4(transformed, 1.);
             gl_PointSize = scale * (3600.0 / -mvPosition.z);
         }
-    `,
-
-    fragmentShader: glsl`
+    `,fragmentShader:glsl`
         precision highp float;
         uniform float progress;
         uniform float time;
@@ -120,5 +115,4 @@ export const ParticleMatShader = {
         
             gl_FragColor = finalColor;
         }
-    `,
-};
+    `};export{ParticleMatShader};
