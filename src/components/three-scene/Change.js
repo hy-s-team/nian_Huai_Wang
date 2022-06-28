@@ -1,6 +1,6 @@
-const console = {
-  log: () => { }
-}
+// const console = {
+//   log: () => { }
+// }
 
 import * as THREE from "three";
 import { Utils } from "run-scene-v2";
@@ -651,13 +651,12 @@ class KongMingLight {
   anima(cb) {
     return new Promise((s) => {
       Object.values(this.Kong_Ming_Deng).map((light, index) => {
-        if (this.lightAnimaEvents[light.name])
-          this.lightAnimaEvents
-            ? this.lightAnimaEvents[light.name].kill()
-            : null;
+        const name = light.name;
+        if (this.lightAnimaEvents[name])
+          this.lightAnimaEvents ? this.lightAnimaEvents[name].kill() : null;
         const info = {
           light,
-          name: light.name,
+          name,
           s,
           cb,
           index,
@@ -670,12 +669,13 @@ class KongMingLight {
   }
 
   _gsap(info) {
-    const { light, name, s, cb, index } = info;
+    const { light, name, s } = info;
     light.layers.enable(1);
     light.visible = true;
     light.position.y = 0;
     const addY = Math.random() * 500;
     const time = (Math.random() + 0.6) * 25;
+    // const time = (Math.random() + 0.6) * 2;
     this.lightAnimaEvents[name] = Utils.anima(
       {
         lightY: light.position.y,
@@ -688,11 +688,13 @@ class KongMingLight {
       time,
       (data) => {
         light.position.y = data.lightY;
-        // light.material.opacity = data.opc;
+        light.material.opacity = data.opc;
       },
       () => {
         light.visible = false;
-        if (index + 1 === Object.values(this.Kong_Ming_Deng).length) s();
+        Object.values(this.Kong_Ming_Deng).every((l) => l.visible === false)
+          ? s()
+          : null;
       }
     );
   }
