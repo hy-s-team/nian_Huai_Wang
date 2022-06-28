@@ -2,7 +2,7 @@ import * as THREE from "three";
 import { Utils } from "run-scene-v2";
 const { getRes, getMacro } = Utils;
 import { MTNhw } from "./MTNhw";
-import { FresnelShader } from "./../materials/FresnelShader";
+import { FresnelShader } from "../materials/FresnelShader";
 import VConsole from "vconsole";
 // 声明变量
 let camera, scene, controls, renderer2, renderer, dom, t, p, runScene;
