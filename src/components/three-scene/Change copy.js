@@ -726,34 +726,29 @@ class LotusBgc {
 class Tree {
   once = true;
   treeAnima = {};
-  isShow = null
-  anima(isShow) {
-    this.once = true;
-    this.isShow = isShow
-    this.treeAnima[`one`] && this.treeAnima[`one`].kill();
+  anima() {
+    this.reset();
     this.treeAnima[`one`] = Utils.anima(
       {
-        pg: t.mtnhw.treeMaterial.uniforms.progress.value,
-        time: 0
+        pg: 1,
       },
       {
-        pg: isShow ? 0 : 1,
-        time: 1
+        pg: 0,
       },
       6,
       (data) => {
         t.mtnhw.treeMaterial.uniforms.progress.value = data.pg;
-        const Judge = t.tree.isShow ? (data.time >= 0.5) : (data.time <= 0.3);
-        if (Judge && this.once) {
+        if (data.pg <= 0.5 && this.once) {
           this.once = false;
           if (this.once) return;
           this.treeAnima[`two`] && this.treeAnima[`two`].kill();
+          t.mtnhw.lightBallMesh.material.opacity = 0;
           t.tree.treeAnima[`two`] = Utils.anima(
             {
-              opc: t.mtnhw.lightBallMesh.material.opacity,
+              opc: 0,
             },
             {
-              opc: t.tree.isShow ? 1 : 0,
+              opc: 1,
             },
             2,
             (data) => {
@@ -763,8 +758,19 @@ class Tree {
         }
       },
       () => {
+        this.once = true;
+        t.mtnhw.lightBallMesh.material.opacity = 0;
+        t.mtnhw.treeMaterial.uniforms.progress.value = 1;
       }
     );
+  }
+
+  reset() {
+    this.once = true;
+    t.mtnhw.treeMaterial.uniforms.progress.value = 1;
+    t.mtnhw.lightBallMesh.material.opacity = 0;
+    this.treeAnima[`two`] && this.treeAnima[`two`].kill();
+    this.treeAnima[`one`] && this.treeAnima[`one`].kill();
   }
 }
 

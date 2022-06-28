@@ -84,9 +84,11 @@ export default {
       isShowLotusBgc: true,
       kongMingLight: true,
       isShowTree: true,
+      isShowFlower: true,
       niangHuaiTangEvents: true,
       guangCangDengEvents: true,
       shangPuDengEvents: true,
+      bubble: true,
     };
   },
   mounted() {
@@ -183,10 +185,15 @@ export default {
       this.shangPuDengEvents = !this.shangPuDengEvents;
     },
     bubbleEvents() {
-      this.change.bubble.events();
+      const cb = () => {
+        console.log("气泡回调");
+      };
+      this.change.bubble.events(this.bubble, cb);
+      this.bubble = !this.bubble;
     },
     showTree() {
-      this.change.tree.anima();
+      this.change.tree.anima(this.isShowTree);
+      this.isShowTree = !this.isShowTree;
     },
     lotusBgc() {
       const cb = () => {
@@ -201,7 +208,8 @@ export default {
       const cb = () => {
         console.log("莲花动画结束");
       };
-      this.change.flower.show(true, cb);
+      this.change.flower.show(this.isShowFlower, cb);
+      this.isShowFlower = !this.isShowFlower;
     },
     // 孔明灯
     async kongMingAnima() {
