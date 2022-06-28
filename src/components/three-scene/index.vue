@@ -3,7 +3,7 @@
     <div
       @pointerdown="
         (e) => {
-          e.preventDefault();
+          // e.preventDefault();
           e.stopPropagation();
         }
       "
@@ -161,13 +161,13 @@ export default {
     },
     onDone() {
       console.log("场景加载完毕~");
-      this.stats = Stats();
-      this.stats.domElement.style.position = "absolute";
-      this.stats.domElement.style.top = "50px";
-      this.runScene.assetsEx.engineDom.appendChild(this.stats.domElement);
-      this.runScene.cb.render.add("stats", () => {
-        this.stats.update();
-      });
+      // this.stats = Stats();
+      // this.stats.domElement.style.position = "absolute";
+      // this.stats.domElement.style.top = "50px";
+      // this.runScene.assetsEx.engineDom.appendChild(this.stats.domElement);
+      // this.runScene.cb.render.add("stats", () => {
+      //   this.stats.update();
+      // });
     },
     niangHuaiTang() {
       this.change.squareLight.niangHuaiTangEvents(this.niangHuaiTangEvents);

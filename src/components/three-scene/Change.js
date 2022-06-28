@@ -99,8 +99,9 @@ function Change(runScene) {
 
     this.clock = new THREE.Clock();
 
-    setTimeout(() => {
-      runScene.bloom.glow.bloomParams.isBloom = false;
+    const timer = setTimeout(() => {
+      // runScene.bloom.glow.bloomParams.isBloom = false;
+      clearTimeout(timer);
     }, 1000);
 
     t.runScene.cb.render.add("flowerRotate", () => {
@@ -516,6 +517,7 @@ class Flower {
 class Radial {
   // 射线信息
   sheDengMap = null;
+
   init() {
     // 赋予信息
     this.sheDengMap = {
@@ -843,7 +845,7 @@ class SquareLight {
       if (mode.name === 'Shedeng2') {
         mode.visible = isShow
       } else {
-        isShow ? mode.layers.enable(1) : mode.layers.set(0);
+        t.runScene.modelEx.setGlow(mode, isShow);
       }
     })
   }
@@ -852,7 +854,7 @@ class SquareLight {
     this.shangPuDeng.traverse((mode) => {
       mode.layers && (mode.layers.mask = isShow ? 3 : 1)
       if (mode.layers) {
-        isShow ? mode.layers.enable(1) : mode.layers.set(0);
+        t.runScene.modelEx.setGlow(mode, isShow);
       }
     })
   }
@@ -898,6 +900,7 @@ class Events {
   }
 
   downPosition = { x: 0, y: 0 };
+
   closeAnimaAtStart = {};
 
   mouseDown = (event) => {
