@@ -498,8 +498,12 @@ class Flower {
         model: this.flower,
         isShow: false,
         time: 2,
-        cb,
+        cb: () => {
+          cb();
+          t.runScene.anima.close('flower')
+        },
       });
+
     }
   }
 }
