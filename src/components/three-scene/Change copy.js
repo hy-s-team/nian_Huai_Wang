@@ -305,9 +305,8 @@ class ShopEvent {
   //生成金币看板
   createGoldBorder() {
     Object.keys(this.shopMap).map((i) => {
-      // console.log(this.shopMap[i].borderPosition);
       let dom = document.querySelector(`.${i}金币`);
-      Utils.getMacro(() => {
+      getMacro(() => {
         // dom.classList.add("show");
         dom.classList.add("none");
       }, 500);

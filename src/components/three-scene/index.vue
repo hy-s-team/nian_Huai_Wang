@@ -100,7 +100,8 @@ export default {
     // 加载场景
     loadScene() {
       this.runScene = new RunScene({
-        path: "./assets/scene.glb",
+        // path: "./assets/scene.glb",
+        path: "https://test2-1303915342.cos.ap-shanghai.myqcloud.com/nhw/scene.glb",
         rootDom: this.$refs["three-scene"],
         options: {
           // render2: true,
@@ -203,12 +204,11 @@ export default {
       this.change.flower.show(true, cb);
     },
     // 孔明灯
-    kongMingAnima() {
+    async kongMingAnima() {
       const cb = () => {
-        console.log("孔明灯");
+        console.log("孔明灯回调");
       };
-      this.change.kongMingLight.anima(true, cb);
-      this.kongMingLight = !this.kongMingLight;
+      await this.change.kongMingLight.anima(cb);
     },
     // 打印点击到的模型
     logClickModel(model) {
