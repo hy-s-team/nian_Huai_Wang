@@ -66,7 +66,7 @@ function Change(runScene) {
   controls.screenSpacePanning = false;
 
   // 加载结束
-  runScene.on("lazyLoadedTexture", () => { });
+  runScene.on("lazyLoadedTexture", () => {});
 
   runScene.on("complete", async () => {
     await this.flower.init();
@@ -153,7 +153,7 @@ class Methods {
 
 //克隆事件
 class CloneEvent {
-  constructor() { }
+  constructor() {}
   //克隆模型
   copyModel(model) {
     const copyModel = t.runScene.modelEx.clone(model);
@@ -180,7 +180,7 @@ class CloneEvent {
 
 //商铺事件
 class ShopEvent {
-  constructor() { }
+  constructor() {}
   shopMap;
   cloneModel;
   //初始化
@@ -323,7 +323,7 @@ class ShopEvent {
 
 //塔事件
 class TowerEvent {
-  constructor() { }
+  constructor() {}
   cloneModel;
   peopleArray = [];
   lightMap = {};
@@ -403,6 +403,14 @@ class TowerEvent {
   }
   //人出现
   async peopleApper(num) {
+    t.methods.camAnima({
+      cx: 317.25890722241485,
+      cy: 166.33375385842095,
+      cz: -507.57283416209873,
+      tx: 631.746238533633,
+      ty: 102.56159809733686,
+      tz: -499.231945873334,
+    },1.5);
     if (num >= 20) num = 20;
     for (let i = 0; i < num; i++) {
       await this.asyncApper();
@@ -486,12 +494,12 @@ class Flower {
         isShow,
         time: 4,
       });
-      t.runScene.anima.close('flower')
+      t.runScene.anima.close("flower");
       t.runScene.anima.play("flower", {
         // loop: false,
         // lastFrame: false,
         onFinished() {
-          cb()
+          cb();
         },
       });
     } else {
@@ -501,10 +509,9 @@ class Flower {
         time: 2,
         cb: () => {
           cb();
-          t.runScene.anima.close('flower')
+          t.runScene.anima.close("flower");
         },
       });
-
     }
   }
 }
@@ -737,24 +744,24 @@ class LotusBgc {
 class Tree {
   once = true;
   treeAnima = {};
-  isShow = null
+  isShow = null;
   anima(isShow) {
     this.once = true;
-    this.isShow = isShow
+    this.isShow = isShow;
     this.treeAnima[`one`] && this.treeAnima[`one`].kill();
     this.treeAnima[`one`] = Utils.anima(
       {
         pg: t.mtnhw.treeMaterial.uniforms.progress.value,
-        time: 0
+        time: 0,
       },
       {
         pg: isShow ? 0 : 1,
-        time: 1
+        time: 1,
       },
       6,
       (data) => {
         t.mtnhw.treeMaterial.uniforms.progress.value = data.pg;
-        const Judge = t.tree.isShow ? (data.time >= 0.5) : (data.time <= 0.3);
+        const Judge = t.tree.isShow ? data.time >= 0.5 : data.time <= 0.3;
         if (Judge && this.once) {
           this.once = false;
           if (this.once) return;
@@ -773,8 +780,7 @@ class Tree {
           );
         }
       },
-      () => {
-      }
+      () => {}
     );
   }
 }
@@ -881,7 +887,7 @@ class Events {
       this.mouseDown
     );
     t.runScene.optionsEx.cb.events.pointer.up.add("pointerUp", this.mouseUp);
-    t.runScene.optionsEx.cb.events.mouse.move.add("mouseMove", () => { });
+    t.runScene.optionsEx.cb.events.mouse.move.add("mouseMove", () => {});
   }
 
   showAnima(info) {
@@ -933,9 +939,14 @@ class Events {
   triggerClick = (e) => {
     const model = t.runScene.modelEx.select;
     if (!model) return;
+
+    console.log(
+      `cx:${camera.position.x},cy:${camera.position.y},cz:${camera.position.z},tx:${controls.target.x},ty:${controls.target.y},tz:${controls.target.z}`,
+      "位置"
+    );
   };
 
-  controlStart = () => { };
+  controlStart = () => {};
 
   closeAnmia() {
     Object.values(this.closeAnimaAtStart).map(
