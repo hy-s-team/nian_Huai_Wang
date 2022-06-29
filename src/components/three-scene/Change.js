@@ -66,7 +66,7 @@ function Change(runScene) {
   controls.screenSpacePanning = false;
 
   // 加载结束
-  runScene.on("lazyLoadedTexture", () => {});
+  runScene.on("lazyLoadedTexture", () => { });
 
   runScene.on("complete", async () => {
     await this.flower.init();
@@ -153,7 +153,7 @@ class Methods {
 
 //克隆事件
 class CloneEvent {
-  constructor() {}
+  constructor() { }
   //克隆模型
   copyModel(model) {
     const copyModel = t.runScene.modelEx.clone(model);
@@ -180,7 +180,7 @@ class CloneEvent {
 
 //商铺事件
 class ShopEvent {
-  constructor() {}
+  constructor() { }
   shopMap;
   cloneModel;
   //初始化
@@ -323,7 +323,7 @@ class ShopEvent {
 
 //塔事件
 class TowerEvent {
-  constructor() {}
+  constructor() { }
   cloneModel;
   peopleArray = [];
   lightMap = {};
@@ -403,6 +403,14 @@ class TowerEvent {
   }
   //人出现
   async peopleApper(num) {
+
+    if (num >= 20) num = 20;
+    for (let i = 0; i < num; i++) {
+      await this.asyncApper();
+    }
+  }
+
+  focusTower() {
     t.methods.camAnima({
       cx: 317.25890722241485,
       cy: 166.33375385842095,
@@ -410,12 +418,11 @@ class TowerEvent {
       tx: 631.746238533633,
       ty: 102.56159809733686,
       tz: -499.231945873334,
-    },1.5);
-    if (num >= 20) num = 20;
-    for (let i = 0; i < num; i++) {
-      await this.asyncApper();
-    }
+    }, 1.5);
   }
+
+
+
   //人消失
   async peopleDisapper(num) {
     if (num >= this.peopleArray.length) num = this.peopleArray.length;
@@ -446,13 +453,19 @@ class Flower {
     t.runScene.anima.setModelAnimaNames(flower, ["flower"]);
     t.runScene.modelEx.add(flower);
     this.flower = flower;
-    this.flower.opacity
     this.flower.visible = false;
     this.flower.position.set(
       582.1630877495076,
       318.1238684195186,
       -742.0680735984594
     );
+
+    this.flower.traverse((m) => {
+      if (m.type === "Group") return;
+      if (m.type === "Object3D") return;
+      m.material.transparent = true;
+      m.material.opacity = 0.07;
+    });
   }
 
   _loadGlb(models) {
@@ -493,13 +506,14 @@ class Flower {
         model: this.flower,
         isShow,
         time: 4,
+        opacity: 0.07
       });
-      t.runScene.anima.close("flower");
+      t.runScene.anima.close('flower')
       t.runScene.anima.play("flower", {
         // loop: false,
         // lastFrame: false,
         onFinished() {
-          cb();
+          cb()
         },
       });
     } else {
@@ -507,11 +521,13 @@ class Flower {
         model: this.flower,
         isShow: false,
         time: 2,
+        opacity: 0.07,
         cb: () => {
           cb();
-          t.runScene.anima.close("flower");
+          t.runScene.anima.close('flower')
         },
       });
+
     }
   }
 }
@@ -744,24 +760,24 @@ class LotusBgc {
 class Tree {
   once = true;
   treeAnima = {};
-  isShow = null;
+  isShow = null
   anima(isShow) {
     this.once = true;
-    this.isShow = isShow;
+    this.isShow = isShow
     this.treeAnima[`one`] && this.treeAnima[`one`].kill();
     this.treeAnima[`one`] = Utils.anima(
       {
         pg: t.mtnhw.treeMaterial.uniforms.progress.value,
-        time: 0,
+        time: 0
       },
       {
         pg: isShow ? 0 : 1,
-        time: 1,
+        time: 1
       },
       6,
       (data) => {
         t.mtnhw.treeMaterial.uniforms.progress.value = data.pg;
-        const Judge = t.tree.isShow ? data.time >= 0.5 : data.time <= 0.3;
+        const Judge = t.tree.isShow ? (data.time >= 0.5) : (data.time <= 0.3);
         if (Judge && this.once) {
           this.once = false;
           if (this.once) return;
@@ -780,7 +796,8 @@ class Tree {
           );
         }
       },
-      () => {}
+      () => {
+      }
     );
   }
 }
@@ -852,12 +869,16 @@ class SquareLight {
     this.nianHuaiTang = t.runScene.modelEx.getModel("拈花堂亮灯group");
     this.guangCangDeng = t.runScene.modelEx.getModel("广场亮灯group");
     this.shangPuDeng = t.runScene.modelEx.getModel("商铺亮灯group");
+    this.niangHuaiTangEvents(false);
+    this.guangCangDengEvents(false);
+    this.shangPuDengEvents(false);
   }
 
+  // 拈花堂
   niangHuaiTangEvents(isShow) {
     this.nianHuaiTang.visible = isShow;
   }
-
+  // 广场亮灯
   guangCangDengEvents(isShow) {
     this.guangCangDeng.children.map((mode) => {
       if (mode.name === "Shedeng2") {
@@ -867,7 +888,7 @@ class SquareLight {
       }
     });
   }
-
+  // 商铺亮灯
   shangPuDengEvents(isShow) {
     this.shangPuDeng.traverse((mode) => {
       mode.layers && (mode.layers.mask = isShow ? 3 : 1);
@@ -887,11 +908,11 @@ class Events {
       this.mouseDown
     );
     t.runScene.optionsEx.cb.events.pointer.up.add("pointerUp", this.mouseUp);
-    t.runScene.optionsEx.cb.events.mouse.move.add("mouseMove", () => {});
+    t.runScene.optionsEx.cb.events.mouse.move.add("mouseMove", () => { });
   }
 
   showAnima(info) {
-    const { model, isShow, time, cb } = info;
+    const { model, isShow, time, cb, opacity } = info;
     const models = [];
     model.traverse((m) => {
       if (m.type === "Group") return;
@@ -901,10 +922,9 @@ class Events {
       models.push(m);
     });
     if (isShow) model.visible = isShow;
-    console.log(model, 'model');
     Utils.anima(
-      { opc: isShow ? 0 : 1 },
-      { opc: isShow ? 1 : 0 },
+      { opc: isShow ? 0 : opacity || 1 },
+      { opc: isShow ? opacity || 1 : 0 },
       time,
       (data) => {
         models.map((m) => (m.material.opacity = data.opc));
@@ -939,14 +959,9 @@ class Events {
   triggerClick = (e) => {
     const model = t.runScene.modelEx.select;
     if (!model) return;
-
-    console.log(
-      `cx:${camera.position.x},cy:${camera.position.y},cz:${camera.position.z},tx:${controls.target.x},ty:${controls.target.y},tz:${controls.target.z}`,
-      "位置"
-    );
   };
 
-  controlStart = () => {};
+  controlStart = () => { };
 
   closeAnmia() {
     Object.values(this.closeAnimaAtStart).map(
@@ -961,6 +976,7 @@ class Events {
     dom.removeEventListener("pointerup", this.mouseUp);
     controls.removeEventListener("start", this.controlStart);
   }
+
 }
 
 export default Change;

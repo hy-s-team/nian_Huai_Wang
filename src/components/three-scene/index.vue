@@ -58,6 +58,8 @@
         <button @click="bubbleEvents">水泡</button>
 
         <button @click="isShowLightBeam">光束开启关闭</button>
+
+        <button @click="focusTower">塔聚焦</button>
       </div>
       <div
         class="goldBorder"
@@ -105,8 +107,8 @@ export default {
     // 加载场景
     loadScene() {
       this.runScene = new RunScene({
-        // path: "./assets/scene.glb",
-        path: "https://test2-1303915342.cos.ap-shanghai.myqcloud.com/nhw/scene.glb",
+        path: "./assets/scene.glb",
+        // path: "https://test2-1303915342.cos.ap-shanghai.myqcloud.com/nhw/scene.glb",
         rootDom: this.$refs["three-scene"],
         options: {
           // render2: true,
@@ -174,6 +176,9 @@ export default {
       // this.runScene.cb.render.add("stats", () => {
       //   this.stats.update();
       // });
+    },
+    focusTower() {
+      this.change.towerEvent.focusTower();
     },
     isShowLightBeam() {
       this.change.radial.isShow();
