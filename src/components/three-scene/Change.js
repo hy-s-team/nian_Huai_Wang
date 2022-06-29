@@ -438,6 +438,7 @@ class Flower {
     t.runScene.anima.setModelAnimaNames(flower, ["flower"]);
     t.runScene.modelEx.add(flower);
     this.flower = flower;
+    this.flower.opacity
     this.flower.visible = false;
     this.flower.position.set(
       582.1630877495076,
@@ -600,6 +601,12 @@ class Radial {
         }
       );
     });
+  }
+
+  isShow() {
+    Object.values(this.sheDengMap).map((i) => {
+      i.model.visible = !i.model.visible;
+    })
   }
 }
 
@@ -888,6 +895,7 @@ class Events {
       models.push(m);
     });
     if (isShow) model.visible = isShow;
+    console.log(model, 'model');
     Utils.anima(
       { opc: isShow ? 0 : 1 },
       { opc: isShow ? 1 : 0 },

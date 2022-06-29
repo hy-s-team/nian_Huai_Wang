@@ -56,6 +56,8 @@
         <button @click="showTree">树</button>
 
         <button @click="bubbleEvents">水泡</button>
+
+        <button @click="isShowLightBeam">光束开启关闭</button>
       </div>
       <div
         class="goldBorder"
@@ -89,6 +91,7 @@ export default {
       guangCangDengEvents: true,
       shangPuDengEvents: true,
       bubble: true,
+      isShowRadial: true,
     };
   },
   mounted() {
@@ -171,6 +174,9 @@ export default {
       // this.runScene.cb.render.add("stats", () => {
       //   this.stats.update();
       // });
+    },
+    isShowLightBeam() {
+      this.change.radial.isShow();
     },
     niangHuaiTang() {
       this.change.squareLight.niangHuaiTangEvents(this.niangHuaiTangEvents);
