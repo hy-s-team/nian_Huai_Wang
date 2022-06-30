@@ -4,13 +4,13 @@
 
 import * as THREE from "three";
 import { Utils } from "run-scene-v2";
-const { getRes, getMacro } = Utils;
 import { MTNhw } from "./MTNhw";
 import { FresnelShader } from "../materials/FresnelShader";
 import VConsole from "vconsole";
 // 声明变量
 let camera, scene, controls, renderer2, renderer, dom, t, p, runScene;
 
+const { getRes, getMacro } = Utils;
 // 拿资源
 const setAssets = (assets) => {
   camera = assets.camera;
@@ -508,6 +508,7 @@ class Flower {
         time: 4,
         opacity: 0.07
       });
+      // 关闭动画
       t.runScene.anima.close('flower')
       t.runScene.anima.play("flower", {
         // loop: false,
@@ -611,7 +612,6 @@ class Radial {
         {
           repeat: -1,
           yoyo: true,
-          // yoyoEase: true,
           x: rotation.x,
           y: rotation.y,
           z: rotation.z,
@@ -645,8 +645,6 @@ class KongMingLight {
   // 新孔明灯表
   Kong_Ming_Deng = {};
 
-  isCb = true;
-
   async init() {
     this.kongMingDeng = t.methods.getModel("孔明灯");
     const count = 25;
@@ -679,7 +677,6 @@ class KongMingLight {
         };
         dummy.updateMatrix();
         this.Kong_Ming_Deng[`kmd${num}`].instanceMatrix.needsUpdate = true;
-
         this.Kong_Ming_Deng[`kmd${num}`].visible = false;
       }
       this.Kong_Ming_Deng[`kmd${num}`].name = `孔明灯组${num + 1}`;
