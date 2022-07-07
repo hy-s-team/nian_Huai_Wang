@@ -13,9 +13,15 @@
         <input type="number" v-model="peoPleNumber" />
         <button
           v-for="(item, index) in shopList"
-          @pointerdown="shopPeople(item)"
+          @pointerdown="shopPeopleIn(item)"
         >
-          {{ item }}人出现
+          {{ item }}人进入
+        </button>
+        <button
+          v-for="(item, index) in shopList"
+          @pointerdown="shopPeopleOut(item)"
+        >
+          {{ item }}人出来
         </button>
         <input type="number" v-model="towerPeopleNumber" />
         <button @pointerdown="towerPeopleApper">塔人物出现</button>
@@ -233,8 +239,11 @@ export default {
     logClickModel(model) {
       console.log("点击的模型为:", model.name);
     },
-    shopPeople(shop) {
-      this.change.shopEvent.createPeopleToShop(this.peoPleNumber, shop);
+    shopPeopleIn(shop) {
+      this.change.shopEvent.createPeopleToShop(this.peoPleNumber, shop, 1);
+    },
+    shopPeopleOut(shop) {
+      this.change.shopEvent.createPeopleToShop(this.peoPleNumber, shop, 2);
     },
     towerPeopleApper() {
       this.change.towerEvent.peopleApper(this.towerPeopleNumber);

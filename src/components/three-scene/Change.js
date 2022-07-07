@@ -5,8 +5,7 @@
 import * as THREE from "three";
 import { Utils } from "run-scene-v2";
 import { MTNhw } from "./MTNhw";
-import { FresnelShader } from "../materials/FresnelShader";
-import VConsole from "vconsole";
+// import VConsole from "vconsole";
 // 声明变量
 let camera, scene, controls, renderer2, renderer, dom, t, p, runScene;
 
@@ -66,7 +65,7 @@ function Change(runScene) {
   controls.screenSpacePanning = false;
 
   // 加载结束
-  runScene.on("lazyLoadedTexture", () => { });
+  runScene.on("lazyLoadedTexture", () => {});
 
   runScene.on("complete", async () => {
     await this.flower.init();
@@ -112,10 +111,6 @@ function Change(runScene) {
       // this.mtnhw && this.mtnhw.update();
     });
 
-    t.runScene.cb.render.add("bubble", () => {
-      t.bubble.fresnelUniforms &&
-        (t.bubble.fresnelUniforms.time.value += 6 * this.clock.getDelta());
-    });
   });
 
   // 销毁
@@ -153,7 +148,7 @@ class Methods {
 
 //克隆事件
 class CloneEvent {
-  constructor() { }
+  constructor() {}
   //克隆模型
   copyModel(model) {
     const copyModel = t.runScene.modelEx.clone(model);
@@ -180,7 +175,7 @@ class CloneEvent {
 
 //商铺事件
 class ShopEvent {
-  constructor() { }
+  constructor() {}
   shopMap;
   cloneModel;
   //初始化
@@ -249,61 +244,149 @@ class ShopEvent {
   getRandomRangePosition(Max, Min) {
     return Math.random() * (Max - Min) + Min;
   }
+  //生成第二条路径
+  setSecondRoad(shop) {
+    return {
+      x:
+        (this.shopMap[shop].rangePosition.x +
+          this.shopMap[shop].doorPosition.x) /
+          2,
+      y: this.shopMap[shop].rangePosition.y,
+      z: this.getRandomRangePosition(
+        this.shopMap[shop].endZ,
+        this.shopMap[shop].beginZ
+      ),
+    };
+  }
   //人出现进入店铺后消失
-  createPeopleToShop(number, shop) {
+  async createPeopleToShop(number,shop,dir) {
     for (let i = 0; i < number; i++) {
       let person = t.cloneEvent.copyModel(this.cloneModel);
       t.cloneEvent.setCopyModelProperty(person, {
         visible: true,
         position: {
-          x: this.shopMap[shop].rangePosition.x,
-          y: this.shopMap[shop].rangePosition.y,
-          z: this.getRandomRangePosition(
+          x:dir==1? this.shopMap[shop].rangePosition.x:this.shopMap[shop].doorPosition.x,
+          y:dir==1? this.shopMap[shop].rangePosition.y:this.shopMap[shop].doorPosition.y,
+          z:dir==1? this.getRandomRangePosition(
             this.shopMap[shop].endZ,
             this.shopMap[shop].beginZ
-          ),
+          ):this.shopMap[shop].doorPosition.z,
         },
         opacity: 0,
       });
-      console.log(scene.children, "1");
+      await new Promise(s=>{
+        Utils.anima(
+          {
+            opc:0
+          },
+          {
+            opc:1
+          },
+          0.5,
+          data=>{
+            person.material.opacity = data.opc
+          },
+          async ()=>{
+            s();
+            let x = this.setSecondRoad(shop).x+this.getRandomRangePosition(-10,8);
+            let secondTime =
+              Math.abs(person.position.z - this.shopMap[shop].doorPosition.z) / 20;
+            await this.personMove(
+              person,
+              x,
+              person.position.y,
+              person.position.z,
+              1.5
+            );
+            let oldZ = person.rotation.y;
+            await this.personTurnAround(person, 0);
+            await this.personMove(
+              person,
+              person.position.x,
+              person.position.y,
+              dir==1?this.shopMap[shop].doorPosition.z:this.getRandomRangePosition(this.shopMap[shop].endZ,this.shopMap[shop].beginZ),
+              dir==1?secondTime:1.5
+            );
+            await this.personTurnAround(person, oldZ);
+            await this.personMove(
+              person,
+              dir==1?this.shopMap[shop].doorPosition.x:this.shopMap[shop].rangePosition.x,
+              dir==1?this.shopMap[shop].doorPosition.y:this.shopMap[shop].rangePosition.y,
+              dir==1?this.shopMap[shop].doorPosition.z:person.position.z,
+              1
+            );
+            t.cloneEvent.clearCopyModel(person);
+          }
+        )
+      })
+      // await this.personAppear(person, 1);
+    }
+  }
+  //移动
+  personMove(model, x, y, z, time) {
+    return new Promise((s) => {
       Utils.anima(
         {
-          opc: 0,
+          x: model.position.x,
+          y: model.position.y,
+          z: model.position.z,
         },
         {
-          opc: 1,
+          x: x,
+          y: y,
+          z: z,
+        },
+        time,
+        (data) => {
+          model.position.x = data.x;
+          model.position.y = data.y;
+          model.position.z = data.z;
+        },
+        () => {
+          s();
+        }
+      );
+    });
+  }
+  //人转身
+  personTurnAround(model, toZ) {
+    return new Promise((s) => {
+      Utils.anima(
+        {
+          y: model.rotation.y,
+        },
+        {
+          y: toZ,
         },
         0.5,
         (data) => {
-          person.material.opacity = data.opc;
+          model.rotation.y = data.y;
         },
         () => {
-          Utils.anima(
-            {
-              x: person.position.x,
-              y: person.position.y,
-              z: person.position.z,
-            },
-            {
-              x: this.shopMap[shop].doorPosition.x,
-              y: this.shopMap[shop].doorPosition.y,
-              z: this.shopMap[shop].doorPosition.z,
-            },
-            1.5,
-            (data) => {
-              person.position.x = data.x;
-              person.position.y = data.y;
-              person.position.z = data.z;
-              console.log(scene.children.length, "2");
-            },
-            () => {
-              t.cloneEvent.clearCopyModel(person);
-              console.log(scene.children.length, "3");
-            }
-          );
+          s();
         }
       );
-    }
+    });
+  }
+  //人出现消失
+  personAppear(model, opc) {
+    return new Promise((s) => {
+      Utils.anima(
+        {
+          opc: model.material.opacity,
+        },
+        {
+          opc: opc,
+        },
+        0.5,
+        (data) => {
+          model.material.opacity = data.opc;
+        },
+        () => {
+          s();
+        }
+      );
+    });
   }
   //生成金币看板
   createGoldBorder() {
@@ -323,7 +406,7 @@ class ShopEvent {
 
 //塔事件
 class TowerEvent {
-  constructor() { }
+  constructor() {}
   cloneModel;
   peopleArray = [];
   lightMap = {};
@@ -403,7 +486,6 @@ class TowerEvent {
   }
   //人出现
   async peopleApper(num) {
-
     if (num >= 20) num = 20;
     for (let i = 0; i < num; i++) {
       await this.asyncApper();
@@ -411,17 +493,18 @@ class TowerEvent {
   }
 
   focusTower() {
-    t.methods.camAnima({
-      cx: 317.25890722241485,
-      cy: 166.33375385842095,
-      cz: -507.57283416209873,
-      tx: 631.746238533633,
-      ty: 102.56159809733686,
-      tz: -499.231945873334,
-    }, 1.5);
+    t.methods.camAnima(
+      {
+        cx: 317.25890722241485,
+        cy: 166.33375385842095,
+        cz: -507.57283416209873,
+        tx: 631.746238533633,
+        ty: 102.56159809733686,
+        tz: -499.231945873334,
+      },
+      1.5
+    );
   }
-
-
 
   //人消失
   async peopleDisapper(num) {
@@ -506,15 +589,15 @@ class Flower {
         model: this.flower,
         isShow,
         time: 4,
-        opacity: 0.07
+        opacity: 0.07,
       });
       // 关闭动画
-      t.runScene.anima.close('flower')
+      t.runScene.anima.close("flower");
       t.runScene.anima.play("flower", {
         // loop: false,
         // lastFrame: false,
         onFinished() {
-          cb()
+          cb();
         },
       });
     } else {
@@ -525,10 +608,9 @@ class Flower {
         opacity: 0.07,
         cb: () => {
           cb();
-          t.runScene.anima.close('flower')
+          t.runScene.anima.close("flower");
         },
       });
-
     }
   }
 }
@@ -629,7 +711,7 @@ class Radial {
   isShow() {
     Object.values(this.sheDengMap).map((i) => {
       i.model.visible = !i.model.visible;
-    })
+    });
   }
 }
 
@@ -757,24 +839,24 @@ class LotusBgc {
 class Tree {
   once = true;
   treeAnima = {};
-  isShow = null
+  isShow = null;
   anima(isShow) {
     this.once = true;
-    this.isShow = isShow
+    this.isShow = isShow;
     this.treeAnima[`one`] && this.treeAnima[`one`].kill();
     this.treeAnima[`one`] = Utils.anima(
       {
         pg: t.mtnhw.treeMaterial.uniforms.progress.value,
-        time: 0
+        time: 0,
       },
       {
         pg: isShow ? 0 : 1,
-        time: 1
+        time: 1,
       },
       6,
       (data) => {
         t.mtnhw.treeMaterial.uniforms.progress.value = data.pg;
-        const Judge = t.tree.isShow ? (data.time >= 0.5) : (data.time <= 0.3);
+        const Judge = t.tree.isShow ? data.time >= 0.5 : data.time <= 0.3;
         if (Judge && this.once) {
           this.once = false;
           if (this.once) return;
@@ -793,8 +875,7 @@ class Tree {
           );
         }
       },
-      () => {
-      }
+      () => {}
     );
   }
 }
@@ -802,44 +883,15 @@ class Tree {
 // 气泡
 class Bubble {
   bubble = null;
-  fresnelUniforms = undefined;
   init() {
     this.bubble = t.methods.getModel("水泡");
     this.bubble.visible = true;
     this.bubble.scale.set(0, 0, 0);
-    this.fresnelUniforms = FresnelShader.uniforms;
-    this.bubble.material.onBeforeCompile = (shader) => {
-      if (!shader.uniforms.time)
-        shader.uniforms.time = this.fresnelUniforms.time;
-      if (!shader.uniforms.fresnelBias)
-        shader.uniforms.fresnelBias = this.fresnelUniforms.bias;
-      if (!shader.uniforms.fresnelScale)
-        shader.uniforms.fresnelScale = this.fresnelUniforms.scale;
-      if (!shader.uniforms.fresnelPower)
-        shader.uniforms.fresnelPower = this.fresnelUniforms.power;
-      shader.vertexShader = shader.vertexShader.replace(
-        /varying vec3 vWorldPosition;/g,
-        FresnelShader.vertexParas
-      );
-      shader.vertexShader = shader.vertexShader.replace(
-        /#include <begin_vertex>/g,
-        FresnelShader.vertexShader1
-      );
-      shader.vertexShader = shader.vertexShader.replace(
-        /vWorldPosition = worldPosition.xyz;/g,
-        FresnelShader.vertexShader2
-      );
-      shader.fragmentShader = shader.fragmentShader.replace(
-        /#include <transmission_pars_fragment>/g,
-        FresnelShader.fragmentParas
-      );
-      shader.fragmentShader = shader.fragmentShader.replace(
-        /vec3 totalEmissiveRadiance = emissive;/g,
-        FresnelShader.fragmentShaderEmissive
-      );
-    };
   }
   events(isShow, cb) {
+    console.log(this.bubble.material,"this.bubble.material");
+    this.bubble.material.matrixWorldNeedsUpdate = true
+    this.bubble.material.isSurge.value = true
     Utils.anima(
       {
         scale: this.bubble.scale.x,
@@ -905,7 +957,7 @@ class Events {
       this.mouseDown
     );
     t.runScene.optionsEx.cb.events.pointer.up.add("pointerUp", this.mouseUp);
-    t.runScene.optionsEx.cb.events.mouse.move.add("mouseMove", () => { });
+    t.runScene.optionsEx.cb.events.mouse.move.add("mouseMove", () => {});
   }
 
   showAnima(info) {
@@ -958,7 +1010,7 @@ class Events {
     if (!model) return;
   };
 
-  controlStart = () => { };
+  controlStart = () => {};
 
   closeAnmia() {
     Object.values(this.closeAnimaAtStart).map(
@@ -973,7 +1025,6 @@ class Events {
     dom.removeEventListener("pointerup", this.mouseUp);
     controls.removeEventListener("start", this.controlStart);
   }
-
 }
 
 export default Change;

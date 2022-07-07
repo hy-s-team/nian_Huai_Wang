@@ -1,5 +1,5 @@
 
-export const FresnelShader = {
+export const Shader = {
 
     uniforms: {
         time: { value: 0 },
@@ -32,9 +32,9 @@ export const FresnelShader = {
     fragmentParas: /* glsl */`
         #include <transmission_pars_fragment>
         varying vec3 vWorldNormal;
-        uniform float fresnelBias;
-        uniform float fresnelScale;
-        uniform float fresnelPower;
+        uniform float Bias;
+        uniform float Scale;
+        uniform float Power;
     `,
 
     /**
@@ -43,10 +43,10 @@ export const FresnelShader = {
      */
     fragmentShaderEmissive: /* glsl */`
         vec3 viewDir = normalize(cameraPosition - vWorldPosition);
-        float fresnelNdot = dot(viewDir, vWorldNormal);
-        float fresnelValue = fresnelBias + fresnelScale * pow(1.0 - fresnelNdot, fresnelPower);
-        // fresnelValue = [0, 1]， 0=center，1=edge
+        float Ndot = dot(viewDir, vWorldNormal);
+        float Value = Bias + Scale * pow(1.0 - Ndot, Power);
+        // Value = [0, 1]， 0=center，1=edge
         
-        vec3 totalEmissiveRadiance = emissive * fresnelValue;
+        vec3 totalEmissiveRadiance = emissive * Value;
     `,
 };
