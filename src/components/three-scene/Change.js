@@ -64,10 +64,9 @@ function Change(runScene) {
 
   controls.screenSpacePanning = false;
 
-  // 加载结束
-  runScene.on("lazyLoadedTexture", () => {});
-
+  // 加载完成
   runScene.on("complete", async () => {
+
     await this.flower.init();
 
     this.shopEvent.init();
@@ -148,7 +147,7 @@ class Methods {
 
 //克隆事件
 class CloneEvent {
-  constructor() {}
+  constructor() { }
   //克隆模型
   copyModel(model) {
     const copyModel = t.runScene.modelEx.clone(model);
@@ -175,7 +174,7 @@ class CloneEvent {
 
 //商铺事件
 class ShopEvent {
-  constructor() {}
+  constructor() { }
   shopMap;
   cloneModel;
   //初始化
@@ -250,7 +249,7 @@ class ShopEvent {
       x:
         (this.shopMap[shop].rangePosition.x +
           this.shopMap[shop].doorPosition.x) /
-          2,
+        2,
       y: this.shopMap[shop].rangePosition.y,
       z: this.getRandomRangePosition(
         this.shopMap[shop].endZ,
@@ -259,36 +258,36 @@ class ShopEvent {
     };
   }
   //人出现进入店铺后消失
-  async createPeopleToShop(number,shop,dir) {
+  async createPeopleToShop(number, shop, dir) {
     for (let i = 0; i < number; i++) {
       let person = t.cloneEvent.copyModel(this.cloneModel);
       t.cloneEvent.setCopyModelProperty(person, {
         visible: true,
         position: {
-          x:dir==1? this.shopMap[shop].rangePosition.x:this.shopMap[shop].doorPosition.x,
-          y:dir==1? this.shopMap[shop].rangePosition.y:this.shopMap[shop].doorPosition.y,
-          z:dir==1? this.getRandomRangePosition(
+          x: dir == 1 ? this.shopMap[shop].rangePosition.x : this.shopMap[shop].doorPosition.x,
+          y: dir == 1 ? this.shopMap[shop].rangePosition.y : this.shopMap[shop].doorPosition.y,
+          z: dir == 1 ? this.getRandomRangePosition(
             this.shopMap[shop].endZ,
             this.shopMap[shop].beginZ
-          ):this.shopMap[shop].doorPosition.z,
+          ) : this.shopMap[shop].doorPosition.z,
         },
         opacity: 0,
       });
-      await new Promise(s=>{
+      await new Promise(s => {
         Utils.anima(
           {
-            opc:0
+            opc: 0
           },
           {
-            opc:1
+            opc: 1
           },
           0.5,
-          data=>{
+          data => {
             person.material.opacity = data.opc
           },
-          async ()=>{
+          async () => {
             s();
-            let x = this.setSecondRoad(shop).x+this.getRandomRangePosition(-10,8);
+            let x = this.setSecondRoad(shop).x + this.getRandomRangePosition(-10, 8);
             let secondTime =
               Math.abs(person.position.z - this.shopMap[shop].doorPosition.z) / 20;
             await this.personMove(
@@ -304,15 +303,15 @@ class ShopEvent {
               person,
               person.position.x,
               person.position.y,
-              dir==1?this.shopMap[shop].doorPosition.z:this.getRandomRangePosition(this.shopMap[shop].endZ,this.shopMap[shop].beginZ),
-              dir==1?secondTime:1.5
+              dir == 1 ? this.shopMap[shop].doorPosition.z : this.getRandomRangePosition(this.shopMap[shop].endZ, this.shopMap[shop].beginZ),
+              dir == 1 ? secondTime : 1.5
             );
             await this.personTurnAround(person, oldZ);
             await this.personMove(
               person,
-              dir==1?this.shopMap[shop].doorPosition.x:this.shopMap[shop].rangePosition.x,
-              dir==1?this.shopMap[shop].doorPosition.y:this.shopMap[shop].rangePosition.y,
-              dir==1?this.shopMap[shop].doorPosition.z:person.position.z,
+              dir == 1 ? this.shopMap[shop].doorPosition.x : this.shopMap[shop].rangePosition.x,
+              dir == 1 ? this.shopMap[shop].doorPosition.y : this.shopMap[shop].rangePosition.y,
+              dir == 1 ? this.shopMap[shop].doorPosition.z : person.position.z,
               1
             );
             t.cloneEvent.clearCopyModel(person);
@@ -406,7 +405,7 @@ class ShopEvent {
 
 //塔事件
 class TowerEvent {
-  constructor() {}
+  constructor() { }
   cloneModel;
   peopleArray = [];
   lightMap = {};
@@ -875,7 +874,7 @@ class Tree {
           );
         }
       },
-      () => {}
+      () => { }
     );
   }
 }
@@ -889,7 +888,7 @@ class Bubble {
     this.bubble.scale.set(0, 0, 0);
   }
   events(isShow, cb) {
-    console.log(this.bubble.material,"this.bubble.material");
+    console.log(this.bubble.material, "this.bubble.material");
     this.bubble.material.matrixWorldNeedsUpdate = true
     this.bubble.material.isSurge.value = true
     Utils.anima(
@@ -957,7 +956,7 @@ class Events {
       this.mouseDown
     );
     t.runScene.optionsEx.cb.events.pointer.up.add("pointerUp", this.mouseUp);
-    t.runScene.optionsEx.cb.events.mouse.move.add("mouseMove", () => {});
+    t.runScene.optionsEx.cb.events.mouse.move.add("mouseMove", () => { });
   }
 
   showAnima(info) {
@@ -1010,7 +1009,7 @@ class Events {
     if (!model) return;
   };
 
-  controlStart = () => {};
+  controlStart = () => { };
 
   closeAnmia() {
     Object.values(this.closeAnimaAtStart).map(

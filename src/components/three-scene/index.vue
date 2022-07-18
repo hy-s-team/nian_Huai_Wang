@@ -110,11 +110,12 @@ export default {
     // this.proxyMsg();
   },
   methods: {
+    // 123
     // 加载场景
     loadScene() {
       this.runScene = new RunScene({
-        path: "./assets/scene.glb",
-        // path: "https://test2-1303915342.cos.ap-shanghai.myqcloud.com/nhw/scene.glb",
+        // path: "./assets/scene.glb",
+        path: "https://test2-1303915342.cos.ap-shanghai.myqcloud.com/nhw/scene.glb",
         rootDom: this.$refs["three-scene"],
         options: {
           // render2: true,
