@@ -440,7 +440,7 @@ class TowerEvent {
   cloneModel;
   peopleArray = [];
   lightMap = {};
-  oldColor={}
+  oldColor = {}
   init() {
     this.cloneModel = t.methods.getModel("ren_0");
     this.lightMap = {
@@ -456,11 +456,11 @@ class TowerEvent {
         op.material = op.material.clone();
       })
     })
-    Object.keys(this.lightMap).map(i=>{
-      if(i=='顶楼'){
+    Object.keys(this.lightMap).map(i => {
+      if (i == '顶楼') {
         this.oldColor['顶楼'] = this.lightMap['顶楼'].material.emissive
-      }else{
-        this.lightMap[i].children.map(op=>{
+      } else {
+        this.lightMap[i].children.map(op => {
           this.oldColor[op.name] = op.material.emissive
         })
       }
