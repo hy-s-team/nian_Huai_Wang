@@ -65,7 +65,7 @@ function Change(runScene) {
   controls.screenSpacePanning = false;
 
   // 加载结束
-  runScene.on("lazyLoadedTexture", () => {});
+  runScene.on("lazyLoadedTexture", () => { });
 
   runScene.on("complete", async () => {
     t.methods.camAnima({
@@ -156,7 +156,7 @@ class Methods {
 
 //克隆事件
 class CloneEvent {
-  constructor() {}
+  constructor() { }
   //克隆模型
   copyModel(model) {
     const copyModel = t.runScene.modelEx.clone(model);
@@ -183,7 +183,7 @@ class CloneEvent {
 
 //商铺事件
 class ShopEvent {
-  constructor() {}
+  constructor() { }
   shopMap;
   cloneModel;
   //初始化
@@ -285,9 +285,9 @@ class ShopEvent {
           z:
             dir == 1
               ? this.getRandomRangePosition(
-                  this.shopMap[shop].endZ,
-                  this.shopMap[shop].beginZ
-                )
+                this.shopMap[shop].endZ,
+                this.shopMap[shop].beginZ
+              )
               : this.shopMap[shop].doorPosition.z,
         },
         opacity: 0,
@@ -327,9 +327,9 @@ class ShopEvent {
               dir == 1
                 ? this.shopMap[shop].doorPosition.z
                 : this.getRandomRangePosition(
-                    this.shopMap[shop].endZ,
-                    this.shopMap[shop].beginZ
-                  ),
+                  this.shopMap[shop].endZ,
+                  this.shopMap[shop].beginZ
+                ),
               dir == 1 ? secondTime : 1.5
             );
             await this.personTurnAround(person, oldZ);
@@ -436,10 +436,11 @@ class ShopEvent {
 
 //塔事件
 class TowerEvent {
-  constructor() {}
+  constructor() { }
   cloneModel;
   peopleArray = [];
   lightMap = {};
+  oldColor={}
   init() {
     this.cloneModel = t.methods.getModel("ren_0");
     this.lightMap = {
@@ -450,10 +451,19 @@ class TowerEvent {
       "5楼": t.methods.getModel("TaLight_5F"),
       顶楼: t.methods.getModel("Ding"),
     };
-    Object.values(this.lightMap).map(i=>{
-        i.children.map(op=>{
-            op.material = op.material.clone();
+    Object.values(this.lightMap).map(i => {
+      i.children.map(op => {
+        op.material = op.material.clone();
+      })
+    })
+    Object.keys(this.lightMap).map(i=>{
+      if(i=='顶楼'){
+        this.oldColor['顶楼'] = this.lightMap['顶楼'].material.emissive
+      }else{
+        this.lightMap[i].children.map(op=>{
+          this.oldColor[op.name] = op.material.emissive
         })
+      }
     })
     console.log(this.lightMap, "lightMap");
   }
@@ -555,18 +565,27 @@ class TowerEvent {
   }
   //灯颜色
   setLight(floor, r, g, b) {
-    if(floor=='顶楼'){
-        i.material.emissive.r = r
-        i.material.emissive.g = g
-        i.material.emissive.b = b
-    }else{
-        this.lightMap[floor].children.map((i) => {
-        i.material.emissive.r = r
-        i.material.emissive.g = g
-        i.material.emissive.b = b
-        });
+    // new THREE.Color(1, 1, 1)
+    // new THREE.Color('rgb(255,255,255)')
+    // new THREE.Color('white')
+    if (floor == '顶楼') {
+      this.lightMap[floor].material.emissive = new THREE.Color(`rgb(${r},${g},${b})`)
+    } else {
+      this.lightMap[floor].children.map((i) => {
+        i.material.emissive = new THREE.Color(`rgb(${r},${g},${b})`)
+      });
     }
   }
+  //恢复颜色
+  // resetColor(){
+  //   Object.keys(this.lightMap).map(floor=>{
+  //     if(floor == '顶楼'){
+  //       this.lightMap['顶楼'].emissive = this.oldColor['顶楼']
+  //     }else{
+  //       this.lightMap
+  //     }
+  //   })
+  // }
 }
 
 // 莲花(骨骼动画) lotus---荷花
@@ -925,7 +944,7 @@ class Tree {
           );
         }
       },
-      () => {}
+      () => { }
     );
   }
 }
@@ -938,11 +957,11 @@ class Bubble {
     this.bubble.visible = true;
     this.bubble.scale.set(0, 0, 0);
   }
-  events(isShow, cb , flag) {
+  events(isShow, cb, flag) {
     console.log(this.bubble.material, "this.bubble.material");
     this.bubble.material.matrixWorldNeedsUpdate = true;
     this.bubble.material.isSurge.value = true;
-    if(flag != 1){
+    if (flag != 1) {
       this.bubble.visible = isShow;
       this.bubble.scale.set(0, 0, 0);
     }
@@ -1011,7 +1030,7 @@ class Events {
       this.mouseDown
     );
     t.runScene.optionsEx.cb.events.pointer.up.add("pointerUp", this.mouseUp);
-    t.runScene.optionsEx.cb.events.mouse.move.add("mouseMove", () => {});
+    t.runScene.optionsEx.cb.events.mouse.move.add("mouseMove", () => { });
   }
 
   showAnima(info) {
@@ -1067,7 +1086,7 @@ class Events {
     if (!model) return;
   };
 
-  controlStart = () => {};
+  controlStart = () => { };
 
   closeAnmia() {
     Object.values(this.closeAnimaAtStart).map(
