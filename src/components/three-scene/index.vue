@@ -66,10 +66,12 @@
         <button @click="isShowLightBeam">光束开启关闭</button>
 
         <button @click="focusTower">塔聚焦</button>
-        <input type="number" v-model="r">
-        <input type="number" v-model="g">
-        <input type="number" v-model="b">
-        <button v-for="(item,indiex) in lightList" @click="setColor(item)">{{item}}光</button>
+        <input type="number" v-model="r" />
+        <input type="number" v-model="g" />
+        <input type="number" v-model="b" />
+        <button v-for="(item, indiex) in lightList" @click="setColor(item)">
+          {{ item }}光
+        </button>
       </div>
       <div
         class="goldBorder"
@@ -89,9 +91,9 @@ import Stats from "three/examples/jsm/libs/stats.module";
 export default {
   data() {
     return {
-      r:0,
-      g:0,
-      b:0,
+      r: 0,
+      g: 0,
+      b: 0,
       change: null,
       runScene: null,
       peoPleNumber: null,
@@ -213,7 +215,7 @@ export default {
         console.log("气泡回调");
       };
       //该方法最后一个参数为1时水泡渐变消失，为2时直接消失
-      this.change.bubble.events(this.bubble, cb,1);
+      this.change.bubble.events(this.bubble, cb, 1);
       this.bubble = !this.bubble;
     },
     showTree() {
@@ -272,9 +274,9 @@ export default {
       dom.classList[isShow ? `add` : `remove`]("show");
     },
     //设置颜色
-    setColor(floor){
-      this.change.towerEvent.setLight(floor,this.r,this.g,this.b);
-    }
+    setColor(floor) {
+      this.change.towerEvent.setLight(floor, this.r, this.g, this.b);
+    },
   },
 };
 </script>
