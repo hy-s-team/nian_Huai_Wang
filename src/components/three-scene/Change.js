@@ -25,9 +25,9 @@ const setAssets = (assets) => {
 // 整体场景事件
 function Change(runScene) {
   /* 拿资源 分解资源
-      this挂载至t上
-      runScene上的其他Api可以直接runScene.直接使用
-  */
+        this挂载至t上
+        runScene上的其他Api可以直接runScene.直接使用
+    */
   setAssets({ ...runScene.assetsEx.get(), t: this, runScene });
 
   // 挂载runScene
@@ -64,8 +64,18 @@ function Change(runScene) {
 
   controls.screenSpacePanning = false;
 
-  // 加载完成
+  // 加载结束
+  runScene.on("lazyLoadedTexture", () => {});
+
   runScene.on("complete", async () => {
+    t.methods.camAnima({
+      cx: 260.597805358153,
+      cy: 199.3290531627542,
+      cz: -468.8160824861443,
+      tx: 381.44877055009533,
+      ty: 174.72728011528125,
+      tz: -479.9673729494797,
+    });
 
     await this.flower.init();
 
@@ -109,7 +119,6 @@ function Change(runScene) {
       t.flower.flower && (t.flower.flower.rotation.y += 0.01);
       // this.mtnhw && this.mtnhw.update();
     });
-
   });
 
   // 销毁
@@ -147,7 +156,7 @@ class Methods {
 
 //克隆事件
 class CloneEvent {
-  constructor() { }
+  constructor() {}
   //克隆模型
   copyModel(model) {
     const copyModel = t.runScene.modelEx.clone(model);
@@ -174,13 +183,14 @@ class CloneEvent {
 
 //商铺事件
 class ShopEvent {
-  constructor() { }
+  constructor() {}
   shopMap;
   cloneModel;
   //初始化
   init() {
     console.log(t.runScene);
     this.cloneModel = t.methods.getModel("SP人");
+    this.cloneModel.visible = false;
     this.shopMap = {
       商铺1: {
         borderPosition: t.methods.getModel("商铺1"),
@@ -264,32 +274,43 @@ class ShopEvent {
       t.cloneEvent.setCopyModelProperty(person, {
         visible: true,
         position: {
-          x: dir == 1 ? this.shopMap[shop].rangePosition.x : this.shopMap[shop].doorPosition.x,
-          y: dir == 1 ? this.shopMap[shop].rangePosition.y : this.shopMap[shop].doorPosition.y,
-          z: dir == 1 ? this.getRandomRangePosition(
-            this.shopMap[shop].endZ,
-            this.shopMap[shop].beginZ
-          ) : this.shopMap[shop].doorPosition.z,
+          x:
+            dir == 1
+              ? this.shopMap[shop].rangePosition.x
+              : this.shopMap[shop].doorPosition.x,
+          y:
+            dir == 1
+              ? this.shopMap[shop].rangePosition.y
+              : this.shopMap[shop].doorPosition.y,
+          z:
+            dir == 1
+              ? this.getRandomRangePosition(
+                  this.shopMap[shop].endZ,
+                  this.shopMap[shop].beginZ
+                )
+              : this.shopMap[shop].doorPosition.z,
         },
         opacity: 0,
       });
-      await new Promise(s => {
+      await new Promise((s) => {
         Utils.anima(
           {
-            opc: 0
+            opc: 0,
           },
           {
-            opc: 1
+            opc: 1,
           },
           0.5,
-          data => {
-            person.material.opacity = data.opc
+          (data) => {
+            person.material.opacity = data.opc;
           },
           async () => {
             s();
-            let x = this.setSecondRoad(shop).x + this.getRandomRangePosition(-10, 8);
+            let x =
+              this.setSecondRoad(shop).x + this.getRandomRangePosition(-10, 8);
             let secondTime =
-              Math.abs(person.position.z - this.shopMap[shop].doorPosition.z) / 20;
+              Math.abs(person.position.z - this.shopMap[shop].doorPosition.z) /
+              20;
             await this.personMove(
               person,
               x,
@@ -303,21 +324,31 @@ class ShopEvent {
               person,
               person.position.x,
               person.position.y,
-              dir == 1 ? this.shopMap[shop].doorPosition.z : this.getRandomRangePosition(this.shopMap[shop].endZ, this.shopMap[shop].beginZ),
+              dir == 1
+                ? this.shopMap[shop].doorPosition.z
+                : this.getRandomRangePosition(
+                    this.shopMap[shop].endZ,
+                    this.shopMap[shop].beginZ
+                  ),
               dir == 1 ? secondTime : 1.5
             );
             await this.personTurnAround(person, oldZ);
             await this.personMove(
               person,
-              dir == 1 ? this.shopMap[shop].doorPosition.x : this.shopMap[shop].rangePosition.x,
-              dir == 1 ? this.shopMap[shop].doorPosition.y : this.shopMap[shop].rangePosition.y,
+              dir == 1
+                ? this.shopMap[shop].doorPosition.x
+                : this.shopMap[shop].rangePosition.x,
+              dir == 1
+                ? this.shopMap[shop].doorPosition.y
+                : this.shopMap[shop].rangePosition.y,
               dir == 1 ? this.shopMap[shop].doorPosition.z : person.position.z,
               1
             );
+            await this.personAppear(person, 0);
             t.cloneEvent.clearCopyModel(person);
           }
-        )
-      })
+        );
+      });
       // await this.personAppear(person, 1);
     }
   }
@@ -405,7 +436,7 @@ class ShopEvent {
 
 //塔事件
 class TowerEvent {
-  constructor() { }
+  constructor() {}
   cloneModel;
   peopleArray = [];
   lightMap = {};
@@ -419,6 +450,12 @@ class TowerEvent {
       "5楼": t.methods.getModel("TaLight_5F"),
       顶楼: t.methods.getModel("Ding"),
     };
+    Object.values(this.lightMap).map(i=>{
+        i.children.map(op=>{
+            op.material = op.material.clone();
+        })
+    })
+    console.log(this.lightMap, "lightMap");
   }
   //人异步出现
   asyncApper() {
@@ -490,21 +527,19 @@ class TowerEvent {
       await this.asyncApper();
     }
   }
-
   focusTower() {
     t.methods.camAnima(
       {
-        cx: 317.25890722241485,
-        cy: 166.33375385842095,
-        cz: -507.57283416209873,
-        tx: 631.746238533633,
-        ty: 102.56159809733686,
-        tz: -499.231945873334,
+        cx: 260.597805358153,
+        cy: 199.3290531627542,
+        cz: -468.8160824861443,
+        tx: 381.44877055009533,
+        ty: 174.72728011528125,
+        tz: -479.9673729494797,
       },
       1.5
     );
   }
-
   //人消失
   async peopleDisapper(num) {
     if (num >= this.peopleArray.length) num = this.peopleArray.length;
@@ -517,6 +552,20 @@ class TowerEvent {
   //灯开启关闭
   lightControl(floor, isOpen) {
     this.lightMap[floor].visible = isOpen;
+  }
+  //灯颜色
+  setLight(floor, r, g, b) {
+    if(floor=='顶楼'){
+        i.material.emissive.r = r
+        i.material.emissive.g = g
+        i.material.emissive.b = b
+    }else{
+        this.lightMap[floor].children.map((i) => {
+        i.material.emissive.r = r
+        i.material.emissive.g = g
+        i.material.emissive.b = b
+        });
+    }
   }
 }
 
@@ -726,6 +775,8 @@ class KongMingLight {
   // 新孔明灯表
   Kong_Ming_Deng = {};
 
+  kongMingDeng = null;
+
   async init() {
     this.kongMingDeng = t.methods.getModel("孔明灯");
     const count = 25;
@@ -874,7 +925,7 @@ class Tree {
           );
         }
       },
-      () => { }
+      () => {}
     );
   }
 }
@@ -887,10 +938,14 @@ class Bubble {
     this.bubble.visible = true;
     this.bubble.scale.set(0, 0, 0);
   }
-  events(isShow, cb) {
+  events(isShow, cb , flag) {
     console.log(this.bubble.material, "this.bubble.material");
-    this.bubble.material.matrixWorldNeedsUpdate = true
-    this.bubble.material.isSurge.value = true
+    this.bubble.material.matrixWorldNeedsUpdate = true;
+    this.bubble.material.isSurge.value = true;
+    if(flag != 1){
+      this.bubble.visible = isShow;
+      this.bubble.scale.set(0, 0, 0);
+    }
     Utils.anima(
       {
         scale: this.bubble.scale.x,
@@ -956,7 +1011,7 @@ class Events {
       this.mouseDown
     );
     t.runScene.optionsEx.cb.events.pointer.up.add("pointerUp", this.mouseUp);
-    t.runScene.optionsEx.cb.events.mouse.move.add("mouseMove", () => { });
+    t.runScene.optionsEx.cb.events.mouse.move.add("mouseMove", () => {});
   }
 
   showAnima(info) {
@@ -1005,11 +1060,14 @@ class Events {
   };
 
   triggerClick = (e) => {
+    console.log(controls, "controls");
+    console.log(camera, "camera");
+    // console.log(`cx:${controls.target.x}`);
     const model = t.runScene.modelEx.select;
     if (!model) return;
   };
 
-  controlStart = () => { };
+  controlStart = () => {};
 
   closeAnmia() {
     Object.values(this.closeAnimaAtStart).map(
