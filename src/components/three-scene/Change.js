@@ -184,6 +184,7 @@ class CloneEvent {
 //商铺事件
 class ShopEvent {
   constructor() { }
+  
   shopMap;
   cloneModel;
   //初始化
@@ -600,7 +601,9 @@ class Flower {
   async init() {
     const { material } = await this.loadGlb();
     const flower = await this.loadFbx("./assets/flowerAnima.fbx", material);
-    t.runScene.anima.setModelAnimaNames(flower, ["flower"]);
+    // t.runScene.anima.setModelAnimaNames(flower, ["flower"]);
+    // t.runScene.anima.play(flower,)
+    console.log(flower,"flower"); 
     t.runScene.modelEx.add(flower);
     this.flower = flower;
     this.flower.visible = false;
@@ -1025,12 +1028,12 @@ class SquareLight {
 class Events {
   constructor() {
     controls.addEventListener("start", this.controlStart);
-    t.runScene.optionsEx.cb.events.pointer.down.add(
+    t.runScene.cb.events.pointer.down.add(
       "pointerDown",
       this.mouseDown
     );
-    t.runScene.optionsEx.cb.events.pointer.up.add("pointerUp", this.mouseUp);
-    t.runScene.optionsEx.cb.events.mouse.move.add("mouseMove", () => { });
+    t.runScene.cb.events.pointer.up.add("pointerUp", this.mouseUp);
+    t.runScene.cb.events.mouse.move.add("mouseMove", () => { });
   }
 
   showAnima(info) {

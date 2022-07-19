@@ -104,7 +104,7 @@ export default {
       kongMingLight: true,
       isShowTree: true,
       isShowFlower: true,
-      niangHuaiTangEvents: true,
+      niangHuaiTangEvents: true,  
       guangCangDengEvents: true,
       shangPuDengEvents: true,
       bubble: true,
@@ -122,11 +122,11 @@ export default {
     // 加载场景
     loadScene() {
       this.runScene = new RunScene({
-        // path: "./assets/scene.glb",
+        // path: "./assets/scene2.glb",
         path: "https://test2-1303915342.cos.ap-shanghai.myqcloud.com/nhw/scene.glb",
         rootDom: this.$refs["three-scene"],
         options: {
-          // render2: true,
+          // render2: true, 
           render3: true,
           texture: {
             // load: false,
@@ -169,6 +169,7 @@ export default {
                */
         },
       }).on("complete", () => {
+        return 
         this.onDone();
         this.runScene.assetsEx.scene.children.map((i) => {
           i.castShadow = false;
