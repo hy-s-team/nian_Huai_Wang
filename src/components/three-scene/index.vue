@@ -72,6 +72,11 @@
         <button v-for="(item, indiex) in lightList" @click="setColor(item)">
           {{ item }}光
         </button>
+        <!-- 拈花堂灯光 -->
+        <input type="number" v-model="NHTr">
+        <input type="number" v-model="NHTg">
+        <input type="number" v-model="NHTb">
+        <button @click="setNHTColor">拈花堂灯光</button>
       </div>
       <div
         class="goldBorder"
@@ -94,6 +99,9 @@ export default {
       r: 0,
       g: 0,
       b: 0,
+      NHTr:0,
+      NHTg:0,
+      NHTb:0,
       change: null,
       runScene: null,
       peoPleNumber: null,
@@ -127,9 +135,13 @@ export default {
         rootDom: this.$refs["three-scene"],
         options: {
           // render2: true, 
-          render3: true,
+          // render3: true,
           texture: {
             // load: false,
+            lazyload:{
+                 open:true,
+                 IntervalTime : 16.6
+              },
           },
           /**
             msg?: {
@@ -215,8 +227,7 @@ export default {
       const cb = () => {
         console.log("气泡回调");
       };
-      //该方法最后一个参数为1时水泡渐变消失，为2时直接消失
-      this.change.bubble.events(this.bubble, cb, 1);
+      this.change.bubble.events(this.bubble, cb);
       this.bubble = !this.bubble;
     },
     showTree() {
@@ -278,6 +289,9 @@ export default {
     setColor(floor) {
       this.change.towerEvent.setLight(floor, this.r, this.g, this.b);
     },
+    setNHTColor(){
+      this.change.squareLight.setNHTlight(this.NHTr,this.NHTg,this.NHTb);
+    }
   },
 };
 </script>

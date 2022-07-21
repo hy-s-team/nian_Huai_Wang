@@ -18,7 +18,7 @@
     "less-loader": "^7.0.0",
     "raw-loader": "^4.0.2",
     "run-scene": "^0.0.33",
-    "run-scene-v2": "0.0.34",
+    "run-scene-v2": "0.0.36",
     "vconsole": "^3.14.6",
     "vue": "^3.0.0",
     "vue-router": "^4.0.0-0",

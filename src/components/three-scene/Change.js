@@ -65,8 +65,17 @@ function Change(runScene) {
   controls.screenSpacePanning = false;
 
   // 加载结束
-  runScene.on("lazyLoadedTexture", () => { });
+  runScene.on("lazyLoadedTexture", () => {
 
+  });
+
+  runScene.on('loaded', (a) => {
+    console.log(a, 'a');
+    const model = t.runScene.modelEx.getModel('NHT_roof')
+    // console.log(this.mtnhw.treeMaterial.uniforms.progress);
+    // console.log(this.mtnhw.lightBallMesh.material.opacity);
+    console.log(this.mtnhw, model, 'this.mtnhw');
+  })
   runScene.on("complete", async () => {
     t.methods.camAnima({
       cx: 260.597805358153,
@@ -95,19 +104,6 @@ function Change(runScene) {
 
     this.squareLight.init();
 
-    const tree = t.runScene.modelEx.getModel("group38_shugan1");
-
-    const lightBall = t.runScene.modelEx.getModel("修光球");
-
-    this.mtnhw = new MTNhw({ camera, scene, renderer }, { tree, lightBall });
-
-    // console.log(this.mtnhw.treeMaterial.uniforms.progress);
-    // console.log(this.mtnhw.lightBallMesh.material.opacity);
-
-    // 默认设置为不透明
-    this.mtnhw.lightBallMesh.material.opacity = 0;
-    this.mtnhw.treeMaterial.uniforms.progress.value = 1;
-
     this.clock = new THREE.Clock();
 
     const timer = setTimeout(() => {
@@ -115,11 +111,33 @@ function Change(runScene) {
       clearTimeout(timer);
     }, 1000);
 
+    const tree = t.runScene.modelEx.getModel("group38_shugan1");
+
+    const lightBall = t.runScene.modelEx.getModel("修光球");
+
+    this.mtnhw = new MTNhw({ camera, scene, renderer }, { tree, lightBall });
+    // console.log(this.mtnhw.treeMaterial.uniforms.progress);
+    // console.log(this.mtnhw.lightBallMesh.material.opacity);
+
+    // 默认设置为不透明
+    this.mtnhw.lightBallMesh.material.opacity = 0;
+    this.mtnhw.treeMaterial.uniforms.progress.value = 1;
+
+
+
     t.runScene.cb.render.add("flowerRotate", () => {
       t.flower.flower && (t.flower.flower.rotation.y += 0.01);
-      // this.mtnhw && this.mtnhw.update();
+      this.mtnhw && this.mtnhw.update();
     });
   });
+
+  runScene.on('modelLoaded', (models) => {
+    // models.map((m)=>m.getObjectByName('group38_shugan1').visible = false)
+    console.log(models, "models");
+    // const [root] = models;
+    // console.log(root,'root');
+    // ['group38_shugan1','修光球'].map((i)=>root.getObjectByName(i).visible=false)
+  })
 
   // 销毁
   this.dispose = () => runScene.dispose();
@@ -184,7 +202,7 @@ class CloneEvent {
 //商铺事件
 class ShopEvent {
   constructor() { }
-  
+
   shopMap;
   cloneModel;
   //初始化
@@ -569,6 +587,7 @@ class TowerEvent {
     // new THREE.Color(1, 1, 1)
     // new THREE.Color('rgb(255,255,255)')
     // new THREE.Color('white')
+    this.lightMap[floor].visible = true
     if (floor == '顶楼') {
       this.lightMap[floor].material.emissive = new THREE.Color(`rgb(${r},${g},${b})`)
     } else {
@@ -601,9 +620,9 @@ class Flower {
   async init() {
     const { material } = await this.loadGlb();
     const flower = await this.loadFbx("./assets/flowerAnima.fbx", material);
+    // console.log(t.runScene.anima,'anima');
     // t.runScene.anima.setModelAnimaNames(flower, ["flower"]);
-    // t.runScene.anima.play(flower,)
-    console.log(flower,"flower"); 
+    console.log(flower, "flower");
     t.runScene.modelEx.add(flower);
     this.flower = flower;
     this.flower.visible = false;
@@ -662,8 +681,8 @@ class Flower {
         opacity: 0.07,
       });
       // 关闭动画
-      t.runScene.anima.close("flower");
-      t.runScene.anima.play("flower", {
+      t.runScene.anima.close(this.flower, "Take 001");
+      t.runScene.anima.play(this.flower, "Take 001", {
         // loop: false,
         // lastFrame: false,
         onFinished() {
@@ -678,7 +697,7 @@ class Flower {
         opacity: 0.07,
         cb: () => {
           cb();
-          t.runScene.anima.close("flower");
+          t.runScene.anima.close(this.flower, "Take 001");
         },
       });
     }
@@ -955,34 +974,56 @@ class Tree {
 // 气泡
 class Bubble {
   bubble = null;
+  isShow = false
   init() {
     this.bubble = t.methods.getModel("水泡");
     this.bubble.visible = true;
     this.bubble.scale.set(0, 0, 0);
   }
-  events(isShow, cb, flag) {
+  events(isShow, cb) {
     console.log(this.bubble.material, "this.bubble.material");
     this.bubble.material.matrixWorldNeedsUpdate = true;
     this.bubble.material.isSurge.value = true;
-    if (flag != 1) {
-      this.bubble.visible = isShow;
-      this.bubble.scale.set(0, 0, 0);
-    }
-    Utils.anima(
-      {
-        scale: this.bubble.scale.x,
-      },
-      {
-        scale: isShow ? 1 : 0,
-      },
-      3,
-      (data) => {
-        this.bubble.scale.set(data.scale, data.scale, data.scale);
-      },
-      () => {
-        cb();
+    if (isShow) {
+      if (!this.isShow) {
+        Utils.anima(
+          {
+            scale: this.bubble.scale.x,
+          },
+          {
+            scale: isShow ? 1 : 0,
+          },
+          3,
+          (data) => {
+            this.bubble.scale.set(data.scale, data.scale, data.scale);
+          },
+          () => {
+            this.isShow = true
+            cb();
+          }
+        );
       }
-    );
+    } else {
+      if (this.isShow) {
+        Utils.anima(
+          {
+            opc: 1
+          },
+          {
+            opc: 0
+          },
+          3,
+          data => {
+            this.bubble.material.opacity = data.opc
+          },
+          () => {
+            this.bubble.scale.set(0, 0, 0);
+            this.bubble.material.opacity = 1
+            this.isShow = false
+          }
+        )
+      }
+    }
   }
 }
 
@@ -997,6 +1038,12 @@ class SquareLight {
     this.niangHuaiTangEvents(false);
     this.guangCangDengEvents(false);
     this.shangPuDengEvents(false);
+
+    //克隆拈花堂颜色
+    this.nianHuaiTang.children.map(i => {
+      i.material = i.material.clone();
+    })
+      console.log(this.nianHuaiTang,"nianHuaiTang");
   }
 
   // 拈花堂
@@ -1021,6 +1068,14 @@ class SquareLight {
         t.runScene.modelEx.setGlow(mode, isShow);
       }
     });
+  }
+
+  //拈花堂灯光
+  setNHTlight(r, g, b) {
+    this.nianHuaiTang.visible = true
+    this.nianHuaiTang.children.map(i => {
+      i.material.emissive = new THREE.Color(`rgb(${r},${g},${b})`)
+    })
   }
 }
 
